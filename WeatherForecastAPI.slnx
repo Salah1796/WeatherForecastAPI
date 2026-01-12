@@ -6,4 +6,5 @@
   <Project Path="WeatherForecast.Domain.Tests/WeatherForecast.Domain.Tests.csproj" />
   <Project Path="WeatherForecast.Domain/WeatherForecast.Domain.csproj" />
   <Project Path="WeatherForecast.Infrastructure/WeatherForecast.Infrastructure.csproj" />
+  <Project Path="WeatherForecast.Infrastructure.Tests/WeatherForecast.Infrastructure.Tests.csproj" />
 </Solution>
