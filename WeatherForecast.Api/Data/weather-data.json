@@ -1,0 +1,47 @@
+[
+  {
+    "city": "Cairo",
+    "temperature": 28.5,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Alexandria",
+    "temperature": 24.0,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Giza",
+    "temperature": 29.0,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Luxor",
+    "temperature": 32.5,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Aswan",
+    "temperature": 35.0,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Sharm El Sheikh",
+    "temperature": 26.0,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Hurghada",
+    "temperature": 27.5,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Port Said",
+    "temperature": 23.0,
+    "condition": "Sunny"
+  },
+  {
+    "city": "Suez",
+    "temperature": 25.5,
+    "condition": "Sunny"
+  }
+]
