@@ -255,4 +255,34 @@ public class AuthServiceTests
         Assert.Equal(StatusCode.Unauthorized, result.StatusCode);
         _userRepositoryMock.Verify(x => x.GetByUsernameAsync(request.Username), Times.Once);
     }
+
+    [Fact]
+    public async Task LoginAsync_WithLockedOutUser_ReturnsUnauthorizedErrorWithLockoutMessage()
+    {
+        // Arrange
+        var request = new LoginRequest { Username = "lockeduser", Password = "Password123!" };
+        var hashedPassword = "hashed_password";
+        var validationResult = new FluentValidation.Results.ValidationResult();
+        
+        // Create a user and manually lock it out
+        var user = new User(request.Username, hashedPassword);
+        
+        // Lock the user
+        for(int i=0; i<5; i++) user.IncrementFailedAttempts(5, TimeSpan.FromMinutes(15));
+        
+        _loginValidatorMock.Setup(x => x.ValidateAsync(request, CancellationToken.None))
+            .ReturnsAsync(validationResult);
+        _userRepositoryMock.Setup(x => x.GetByUsernameAsync(request.Username))
+            .ReturnsAsync(user);
+
+        // Act
+        var result = await _authService.LoginAsync(request);
+
+        // Assert
+        Assert.False(result.Success);
+        Assert.Equal(StatusCode.Unauthorized, result.StatusCode);
+        Assert.Contains("AccountLocked", result.Message);
+        
+        _passwordHasherMock.Verify(x => x.VerifyPassword(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
 }

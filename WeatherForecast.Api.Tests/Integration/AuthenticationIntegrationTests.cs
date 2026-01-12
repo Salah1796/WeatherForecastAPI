@@ -4,6 +4,10 @@ using WeatherForecast.Application.Common.Enums;
 using WeatherForecast.Application.Common.Results;
 using WeatherForecast.Application.DTOs;
 using Xunit;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using WeatherForecast.Application.Common.Options;
 
 namespace WeatherForecast.Api.Tests.Integration;
 
@@ -11,9 +15,11 @@ namespace WeatherForecast.Api.Tests.Integration;
 public class AuthenticationIntegrationTests
 {
     private readonly HttpClient _client;
+    private readonly WeatherForecastWebApplicationFactory _factory;
     public AuthenticationIntegrationTests(WeatherForecastWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
+        _factory = factory;
     }
 
     #region Registration Tests
@@ -311,4 +317,36 @@ public class AuthenticationIntegrationTests
 
     #endregion
 
+    [Fact]
+    public async Task Login_MultipleFailedAttempts_LocksAccount()
+    {
+        // Arrange - register user
+        var username = $"lockoutuser_{Guid.NewGuid():N}";
+        var password = "Password123!";
+        var registerRequest = new RegisterRequest { Username = username, Password = password };
+        await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+
+        var loginRequest = new LoginRequest { Username = username, Password = "WrongPassword" };
+        
+        // Read from SecuritySettings
+        var securitySettings = _factory.Services.GetRequiredService<IOptions<SecuritySettings>>().Value;
+        int maxAttempts = securitySettings.MaxFailedLoginAttempts;
+
+        // Act - fail login maxAttempts times
+        for (int i = 0; i < maxAttempts; i++)
+        {
+            var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+            var result = await response.Content.ReadFromJsonAsync<Result<AuthResponse>>();
+            Assert.Equal("Invalid username or password", result!.Message);
+        }
+
+        // Act - attempt login again (should be locked out now)
+        var lockedResponse = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, lockedResponse.StatusCode);
+        var lockedResult = await lockedResponse.Content.ReadFromJsonAsync<Result<AuthResponse>>();
+        Assert.Contains("Account is locked", lockedResult!.Message);
+    }
 }

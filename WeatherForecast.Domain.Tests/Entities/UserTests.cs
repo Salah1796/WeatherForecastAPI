@@ -94,5 +94,80 @@ public class UserTests
         // Assert
         user.Should().BeAssignableTo<Domain.Common.AuditableEntity>();
     }
+
+    [Fact]
+    public void IsLockedOut_WhenLockoutEndInPast_ShouldReturnFalse()
+    {
+        // Arrange
+        var user = new User("testuser", "hash");
+        user.IncrementFailedAttempts(1, TimeSpan.FromMinutes(-15));
+
+        // Act
+        var isLocked = user.IsLockedOut();
+
+        // Assert
+        isLocked.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsLockedOut_WhenLockoutEndInFuture_ShouldReturnTrue()
+    {
+        // Arrange
+        var user = new User("testuser", "hash");
+        user.IncrementFailedAttempts(1, TimeSpan.FromMinutes(15));
+
+        // Act
+        var isLocked = user.IsLockedOut();
+
+        // Assert
+        isLocked.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IncrementFailedAttempts_BelowThreshold_ShouldNotLockout()
+    {
+        // Arrange
+        var user = new User("testuser", "hash");
+
+        // Act
+        user.IncrementFailedAttempts(5, TimeSpan.FromMinutes(15));
+
+        // Assert
+        user.FailedLoginAttempts.Should().Be(1);
+        user.IsLockedOut().Should().BeFalse();
+        user.LockoutEnd.Should().BeNull();
+    }
+
+    [Fact]
+    public void IncrementFailedAttempts_AtThreshold_ShouldLockout()
+    {
+        // Arrange
+        var user = new User("testuser", "hash");
+
+        // Act
+        for(int i=0; i<5; i++)
+            user.IncrementFailedAttempts(5, TimeSpan.FromMinutes(15));
+
+        // Assert
+        user.FailedLoginAttempts.Should().Be(5);
+        user.IsLockedOut().Should().BeTrue();
+        user.LockoutEnd.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void ResetFailedAttempts_ShouldClearCounters()
+    {
+        // Arrange
+        var user = new User("testuser", "hash");
+        user.IncrementFailedAttempts(1, TimeSpan.FromMinutes(15));
+
+        // Act
+        user.ResetFailedAttempts();
+
+        // Assert
+        user.FailedLoginAttempts.Should().Be(0);
+        user.LockoutEnd.Should().BeNull();
+        user.IsLockedOut().Should().BeFalse();
+    }
 }
 
