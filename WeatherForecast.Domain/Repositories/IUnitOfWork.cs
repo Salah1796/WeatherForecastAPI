@@ -8,7 +8,7 @@ public interface IUnitOfWork : IDisposable
     /// <summary>
     /// Gets the user repository.
     /// </summary>
-    IUserRepository Users { get; }
+    IUserRepository UserRepository { get; }
 
     /// <summary>
     /// Persists all changes to the data store.

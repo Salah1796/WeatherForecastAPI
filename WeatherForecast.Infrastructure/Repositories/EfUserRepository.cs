@@ -16,9 +16,9 @@ public class EfUserRepository(AppDbContext context) : GenericRepository<User>(co
     /// </summary>
     /// <param name="username">The username of the user to get.</param>
     /// <returns>The user with the specified username or null if not found.</returns>
-    public async Task<User?> GetByUsernameAsync(string username)
+    public Task<User?> GetByUsernameAsync(string username)
     {
-        return await FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+        return FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
     }
 
     /// <summary>
@@ -26,8 +26,8 @@ public class EfUserRepository(AppDbContext context) : GenericRepository<User>(co
     /// </summary>
     /// <param name="username">The username of the user to check.</param>
     /// <returns>True if the user exists, false otherwise.</returns>
-    public async Task<bool> UserExistsAsync(string username)
+    public Task<bool> UserExistsAsync(string username)
     {
-        return await AnyAsync(u => u.Username.ToLower() == username.ToLower());
+        return AnyAsync(u => u.Username.ToLower() == username.ToLower());
     }
 }

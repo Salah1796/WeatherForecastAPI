@@ -66,14 +66,14 @@ public class AuthService : IAuthService
             return Result<AuthResponse>.ValidationError(validationResult, _localizer["ValidationFailed"]);
         }
 
-        var userExists = await _unitOfWork.Users.UserExistsAsync(request.Username);
+        var userExists = await _unitOfWork.UserRepository.UserExistsAsync(request.Username);
         if (userExists)
             return Result<AuthResponse>.ErrorResponse(_localizer["UsernameAlreadyExists"], StatusCode.Conflict);
 
         var passwordHash = _passwordHasher.HashPassword(request.Password);
         var user = new User(request.Username, passwordHash);
         
-         _unitOfWork.Users.Add(user);
+         _unitOfWork.UserRepository.Add(user);
         await _unitOfWork.SaveChangesAsync();
 
         var token = _tokenGenerator.GenerateToken(user);
@@ -99,7 +99,7 @@ public class AuthService : IAuthService
         if (!validationResult.IsValid)
             return Result<AuthResponse>.ValidationError(validationResult, _localizer["ValidationFailed"]);
 
-        var user = await _unitOfWork.Users.GetByUsernameAsync(request.Username);
+        var user = await _unitOfWork.UserRepository.GetByUsernameAsync(request.Username);
         if (user == null)
             return Result<AuthResponse>.ErrorResponse(_localizer["InvalidCredentials"], StatusCode.Unauthorized);
 
@@ -118,7 +118,7 @@ public class AuthService : IAuthService
                 _securitySettings.MaxFailedLoginAttempts,
                 TimeSpan.FromMinutes(_securitySettings.AccountLockoutDurationMinutes));
             
-            _unitOfWork.Users.Update(user);
+            _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.SaveChangesAsync();
             
             return Result<AuthResponse>.ErrorResponse(_localizer["InvalidCredentials"], StatusCode.Unauthorized);
@@ -126,7 +126,7 @@ public class AuthService : IAuthService
 
         // Successful login - reset failed attempts
         user.ResetFailedAttempts();
-        _unitOfWork.Users.Update(user);
+        _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.SaveChangesAsync();
 
         var token = _tokenGenerator.GenerateToken(user);

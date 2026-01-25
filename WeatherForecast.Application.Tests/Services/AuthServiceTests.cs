@@ -35,7 +35,7 @@ public class AuthServiceTests
         _loginValidatorMock = new Mock<IValidator<LoginRequest>>();
         _localizerMock = new Mock<IAppLocalizer>();
 
-        _unitOfWorkMock.Setup(x => x.Users).Returns(_userRepositoryMock.Object);
+        _unitOfWorkMock.Setup(x => x.UserRepository).Returns(_userRepositoryMock.Object);
 
         // Setup localizer to return the key as the value
         _localizerMock.Setup(x => x[It.IsAny<string>()])

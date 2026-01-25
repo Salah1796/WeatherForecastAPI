@@ -9,21 +9,22 @@ namespace WeatherForecast.Infrastructure.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
-    private IUserRepository? _userRepository;
+    private readonly IUserRepository _userRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
     /// </summary>
     /// <param name="context">The database context.</param>
-    public UnitOfWork(AppDbContext context)
+    public UnitOfWork(AppDbContext context, IUserRepository userRepository)
     {
         _context = context;
+        _userRepository = userRepository;
     }
 
     /// <summary>
     /// Gets the user repository.
     /// </summary>
-    public IUserRepository Users => _userRepository ??= new EfUserRepository(_context);
+    public IUserRepository UserRepository => _userRepository;
 
     /// <summary>
     /// Persists all changes to the database.

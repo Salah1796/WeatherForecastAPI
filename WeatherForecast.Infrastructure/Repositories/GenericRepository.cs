@@ -20,14 +20,14 @@ public class GenericRepository<T>(AppDbContext context) where T : class
     /// <summary>
     /// Checks if any entity matches the predicate.
     /// </summary>
-    public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+    public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _context.Set<T>().AnyAsync(predicate);
+        return _context.Set<T>().AnyAsync(predicate);
     }
 
-    public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+    public Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+        return _context.Set<T>().FirstOrDefaultAsync(predicate);
     }
 
     /// <summary>
